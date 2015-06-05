@@ -22,7 +22,7 @@ class wplms_custom_certificate_codes_settings{
 		$this->settings_tabs($tab);
 		$this->$tab();
 	}
-
+   
 	function settings_tabs( $current = 'general' ) {
 	    $tabs = array( 
 	    		'general' => __('General','wplms_custom_certificate_codes'), 
