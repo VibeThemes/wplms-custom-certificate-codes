@@ -26,6 +26,7 @@ class wplms_custom_certificate_codes_settings{
 	function settings_tabs( $current = 'general' ) {
 	    $tabs = array( 
 	    		'general' => __('General','wplms_custom_certificate_codes'), 
+	    		'codes' => __('Certificate Codes','wplms_custom_certificate_codes'), 
 	    		);
 	    echo '<div id="icon-themes" class="icon32"><br></div>';
 	    echo '<h2 class="nav-tab-wrapper">';
@@ -111,9 +112,19 @@ class wplms_custom_certificate_codes_settings{
 				case 'hidden':
 					echo '<input type="hidden" name="'.$setting['name'].'" value="1"/>';
 				break;
+				case 'certificate_codes':
+					$option =  get_option($setting['name']);
+					if(!isset($option) || !is_array($option)){
+						$option = $setting['std'];
+					}
+					foreach($option as $key => $value){
+						echo '<label>'.$key.'</label><input type="text" id="'.$key.'" value="'.$value.'" />
+						<a class="button update_code" data-key="'.$key.'">Update</a><a data-key="'.$key.'" class="button delete_code">Delete</a>';
+					}
+				break;
 				default:
 					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
-					echo '<td class="forminp"><input type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
+					echo '<td class="forminp"><inpu update_codet type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
 					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 			}
