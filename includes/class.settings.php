@@ -56,6 +56,23 @@ class wplms_custom_certificate_codes_settings{
 		$this->generate_form('general',$settings);
 	}
 
+	function codes(){
+		echo '<h3>'.__('Certificate Codes','wplms_custom_certificate_codes').'</h3>';
+	
+		$settings=array(
+				array(
+					'label' => __('Manage Certificate Codes','wplms_custom_certificate_codes'),
+					'name' => 'wplms_certificate_codes',
+					'type' => 'certificate_codes',
+					'std'=> array(
+						'2060-1139-1' => 'ABC1'
+						),
+					'desc' => __('some description','wplms_custom_certificate_codes')
+				),
+			);
+
+		$this->generate_form('general',$settings);
+	}
 
 	function generate_form($tab,$settings=array()){
 		echo '<form method="post">
