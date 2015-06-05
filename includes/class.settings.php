@@ -7,6 +7,7 @@ class wplms_custom_certificate_codes_settings{
 	public function __construct(){
 		add_options_page(__('Certificate Codes Settings','wplms_custom_certificate_codes'),__('Certificate Codes','wplms_custom_certificate_codes'),'manage_options','wplms_custom_certificate_codes',array($this,'settings'));
 		add_action('admin_enqueue_scripts',array($this,'enqueue_admin_scripts'));
+		
 	}
 
 	function enqueue_admin_scripts($hook){
@@ -17,6 +18,8 @@ class wplms_custom_certificate_codes_settings{
     	wp_enqueue_script( 'wplms_custom_certificate_codes_admin_style', plugin_dir_url( __FILE__ ) . '../assets/js/admin.js',array('jquery'),'1.0',true);
 	}
 
+
+	
 	function settings(){
 		$tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'general';
 		$this->settings_tabs($tab);
@@ -59,15 +62,38 @@ class wplms_custom_certificate_codes_settings{
 
 	function codes(){
 		echo '<h3>'.__('Certificate Codes','wplms_custom_certificate_codes').'</h3>';
-	
+		global $wpdb,$bp;
+		$generated_certificate_codes =array();
+		$certificate_codes = $wpdb->get_results($wpdb->prepare("SELECT activity.id as id, activity.user_id as user_id ,activity.item_id as course_id
+																FROM {$bp->activity->table_name} as activity
+																WHERE component = %s AND type = %s",'course','student_certificate'));
+
+		$activity_table_name = $wpdb->prefix . 'bp_activity_meta';
+
+
+		if(is_array($certificate_codes) && count($certificate_codes)){
+			foreach($certificate_codes as $code){
+				
+				$q = $wpdb->prepare("SELECT meta_key,meta_value FROM {$activity_table_name} WHERE activity_id = %d",$code->id);
+				$certificate_code = $wpdb->get_row($q);				
+				if(isset($certificate_code)){
+					$generated_certificate_codes[$code->id] = array($certificate_code->meta_key => $certificate_code->meta_value);
+				}else{
+					$certificate_template = get_post_meta($code->course_id,'vibe_certificate_template',true);
+					if(!isset($certificate_template) || !is_numeric($certificate_template)){
+						$certificate_template = vibe_get_option('certificate_page');
+					}
+					$c_code = $certificate_template.'-'.$code->course_id.'-'.$code->user_id;
+					$generated_certificate_codes[$code->id]=array($c_code => '');
+				}
+			}	
+		}
 		$settings=array(
 				array(
 					'label' => __('Manage Certificate Codes','wplms_custom_certificate_codes'),
 					'name' => 'wplms_certificate_codes',
 					'type' => 'certificate_codes',
-					'std'=> array(
-						'2060-1139-1' => 'ABC1'
-						),
+					'std'=> $generated_certificate_codes,
 					'desc' => __('some description','wplms_custom_certificate_codes')
 				),
 			);
@@ -118,13 +144,15 @@ class wplms_custom_certificate_codes_settings{
 						$option = $setting['std'];
 					}
 					foreach($option as $key => $value){
-						echo '<label>'.$key.'</label><input type="text" id="'.$key.'" value="'.$value.'" />
-						<a class="button update_code" data-key="'.$key.'">Update</a><a data-key="'.$key.'" class="button delete_code">Delete</a>';
+						foreach($value as $k=>$v){
+							echo '<label>'.$k.'</label><input type="text" id="'.$key.'" data-key="'.$k.'" value="'.$v.'" />
+						<a class="button update_code" data-key="'.$key.'">Update</a><a data-key="'.$key.'" class="button delete_code">Delete</a><br />';
+						}
 					}
 				break;
 				default:
 					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
-					echo '<td class="forminp"><inpu update_codet type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
+					echo '<td class="forminp"><input update_codet type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
 					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 			}
@@ -159,3 +187,4 @@ add_action('admin_menu','init_wplms_custom_certificate_codes_settings',100);
 function init_wplms_custom_certificate_codes_settings(){
 	new wplms_custom_certificate_codes_settings;	
 }
+
