@@ -81,7 +81,7 @@ class wplms_custom_certificate_codes_settings{
 	function codes(){
 		echo '<h3>'.__('Certificate Codes','wplms_custom_certificate_codes').'</h3>';
 		global $wpdb,$bp;
-		$generated_certificate_codes = array();
+		$generated_certificate_codes =array();
 		$start = 0;
 		$num=50;
 		if(isset($_GET['p']) && is_numeric($_GET['p'])){
@@ -104,7 +104,7 @@ class wplms_custom_certificate_codes_settings{
 																AND type = %s 
 																OR (type= %s AND action LIKE %s )
 																ORDER BY activity.id DESC
-																WHERE component = %s AND ( type = %s OR type = %s)",'course','student_certificate','bulk_action'));
+																LIMIT %d,%d",'course','student_certificate','bulk_action',$string,$start,$num));	
 		}
 		
 		$activity_table_name = $wpdb->prefix . 'bp_activity_meta';
@@ -114,8 +114,8 @@ class wplms_custom_certificate_codes_settings{
 
 		if(is_array($certificate_codes) && count($certificate_codes)){
 			foreach($certificate_codes as $code){
-				$q = $wpdb->prepare("SELECT meta_key,meta_value FROM {$activity_table_name} WHERE activity_id = %d",$code->id);
 				
+				$q = $wpdb->prepare("SELECT meta_key,meta_value FROM {$activity_table_name} WHERE activity_id = %d",$code->id);
 				$certificate_code = $wpdb->get_row($q);				
 				if(isset($certificate_code)){
 					if($this->verify_certificate($code->course_id,$code->user_id)){
@@ -141,17 +141,6 @@ class wplms_custom_certificate_codes_settings{
 			}	
 		}
 
-		if($_GET['tab']=="codes"){
-		echo '<style>
-		input[type="submit"].button-primary{display:none;}
-		</style>';
-		echo '<script>
-		jQuery(document).ready(function($){
-		$(".button-primary").attr("disabled","disabled");
-		});
-		</script>';
-		}
-
 		$settings=array(
 				array(
 					'label' => __('Manage Certificate Codes','wplms_custom_certificate_codes'),
@@ -161,8 +150,7 @@ class wplms_custom_certificate_codes_settings{
 					'desc' => __('some description','wplms_custom_certificate_codes')
 				),
 			);
-		echo '<style>input[type="submit"].button-primary{display:none;}
-		</style>';
+
 		$this->generate_form('general',$settings);
 	}
 
@@ -180,7 +168,6 @@ class wplms_custom_certificate_codes_settings{
 		echo '<form method="post">
 				<table class="form-table">';
 		wp_nonce_field('save_settings','_wpnonce');   
-		echo '<ul class="save-settings">';
 
 		foreach($settings as $setting ){
 			echo '<tr valign="top">';
@@ -218,22 +205,22 @@ class wplms_custom_certificate_codes_settings{
 				case 'hidden':
 					echo '<input type="hidden" name="'.$setting['name'].'" value="1"/>';
 				break;
-				case 'certificate_codes': 
+				case 'certificate_codes':
+
 					$option =  get_option($setting['name']);
 					if(!isset($option) || !is_array($option)){
 						$option = $setting['std'];
 					}
 					echo '<input type="text" id="course_id" name="course" placeholder="'.__('Search Course ID',PLUGIN_DOMAIN).'" value="'.(isset($_GET['course'])?$_GET['course']:'').'" />
 					<a id="search_course" class="button button-primary">'.__('SEARCH',PLUGIN_DOMAIN).'</a>';
-					if(is_array($option) && count($option)){
-						foreach($option as $key => $value){ 
+					if (is_array($option) && count($option)){
+						foreach($option as $key => $value){
 
-							if(is_array($value)){
-								foreach($value as $k=>$v){	
-									echo '<ul class="custom_certificate_code">
-									<li><label>'.$k.'</label>&nbsp;<input type="text" id="'.$key.'" data-key="'.$k.'" value="'.$v.'" placeholder="Enter Custom Certificate Code" />
-								&nbsp;&nbsp;<a class="button update_code" data-key="'.$key.'">Update</a>&nbsp;&nbsp;&nbsp;<a data-key="'.$key.'" class="button delete_code ">Delete</a></li>';
-								}
+							foreach((array)$value as $k=>$v){
+								echo '</tr><tr valign="top"><th scope="row" class="titledesc">'.$k.'</th>
+								<td class="forminp"><input type="text" id="'.$key.'" data-key="'.$k.'" value="'.$v.'" />
+								<a class="button button-primary update_code" data-key="'.$key.'">Update</a>&nbsp;<a data-key="'.$key.'" class="button delete_code">Delete</a>
+								</td>';
 							}
 						}
 
