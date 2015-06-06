@@ -7,6 +7,7 @@ class wplms_custom_certificate_codes{
 
 	function __construct(){
 		add_action('wp_ajax_update_certificate_code_meta',array($this,'update_certificate_code_meta'));
+		add_action('wp_ajax_delete_certificate_code_meta',array($this,'delete_certificate_code_meta'));
 		add_filter('wplms_certificate_code',array($this,'my_custom_certificate_code'),10,3);
 		//Remove Certificate validating codes
 		remove_filter('wplms_certificate_code_template_id','wplms_get_template_id_from_certificate_code',10);
@@ -26,11 +27,27 @@ class wplms_custom_certificate_codes{
 		    _e('Security check Failed. Contact Administrator.','wplms_custom_certificate_codes');
 		    die();
 		}
-		if(is_numeric($_POST['activity_id'])){
+		if(is_numeric($_POST['activity_id'])&& isset($_POST['meta_value'])){
 			bp_activity_update_meta($_POST['activity_id'],$_POST['meta_key'],$_POST['meta_value']);
+			echo "Updated";
 		}
 		die();
 	}
+	function delete_certificate_code_meta(){
+		if ( !isset($_POST['security_nonce']) || !wp_verify_nonce($_POST['security_nonce'],'save_settings') ){
+		    _e('Security check Failed. Contact Administrator.','wplms_custom_certificate_codes');
+		    die();
+		}
+		if(is_numeric($_POST['a_id'])){
+			
+			$check=bp_activity_delete_meta($_POST['a_id'],$_POST['meta_key'],$_POST['meta_value']);
+			if($check){
+			echo "Deleted";
+			}
+		}
+		die();
+	}
+
 
 	function my_custom_certificate_code($code,$course_id,$user_id){
 	 
@@ -108,7 +125,9 @@ class wplms_custom_certificate_codes{
 }
 
 
+
 add_action('init','define_wplms_custom_certificate_codes');
 function define_wplms_custom_certificate_codes(){
 	new wplms_custom_certificate_codes;
 }
+?>
