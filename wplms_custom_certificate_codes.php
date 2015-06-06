@@ -15,6 +15,7 @@ if ( ! defined( 'PLUGIN_DOMAIN' ) )
 /*====== BEGIN VSLIDER======*/
 include_once('includes/class.config.php');
 include_once('includes/class.init.php');
+include_once('includes/class.process.php');
 include_once('includes/class.settings.php');
 
 add_action('plugins_loaded','wplms_custom_certificate_codes_load_translations');
@@ -30,4 +31,15 @@ function wplms_custom_certificate_codes_load_translations(){
     } else {
         load_textdomain( PLUGIN_DOMAIN, $mofile_local );
     }   
+}
+
+
+add_action('admin_menu','init_wplms_custom_certificate_codes_settings',100);
+function init_wplms_custom_certificate_codes_settings(){
+    new wplms_custom_certificate_codes_settings;    
+}
+
+add_action('init','define_wplms_custom_certificate_codes');
+function define_wplms_custom_certificate_codes(){
+    new wplms_custom_certificate_codes;
 }

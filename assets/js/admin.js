@@ -3,6 +3,7 @@ jQuery(document).ready(function($){
 
 	$('.update_code').on('click',function(){
 		var $this= $(this);
+		var defaulttext = $this.html();
 		var r = confirm("Are you sure you want to update the Code ?");
 		if (r == true) {
 		    var key = $(this).attr('data-key');
@@ -21,6 +22,9 @@ jQuery(document).ready(function($){
 	            cache: false,
 	            success: function (html) {
 	              $this.html(html);
+	              setTimeout(function(){
+	              	$this.html(defaulttext);
+	              },2000);
 	            }
 	        });
 
@@ -33,6 +37,7 @@ jQuery(document).ready(function($){
 $('.delete_code').on('click',function(){
 
 		var $this= $(this);
+		var defaulttext = $this.html();
 		var x = confirm("Are you sure you want to delete the Code ?");
 		if (x == true) {
 		    var key = $(this).attr('data-key');
@@ -54,7 +59,9 @@ $('.delete_code').on('click',function(){
 
 	              $this.html(html);
 	              $('#'+key).val("");
-
+	              setTimeout(function(){
+	              	$this.html(defaulttext);
+	              },2000);
 	            }
 
 	        });
@@ -63,5 +70,38 @@ $('.delete_code').on('click',function(){
 		    return false;
 		}
 	});
+	$('#search_course').on('click',function(){
+		var pathname = window.location.pathname; // Returns path only
+		var url      = window.location.href; 
+		var fullpath = url+'&course='+$('#course_id').val();
+		window.location.href = fullpath;
+	});
 
+	$('#execute_pattern').on('click',function(){
+		var $this= $(this);
+		var defaulttext = $this.html();
+		var x = confirm("Are you sure you want to continue ?");
+		if (x == true) {
+		    $this.html('Processing...');
+	        $.ajax({
+	            type: "POST",
+	            url: ajaxurl,
+	            async:true,
+	            data: { action: 'process_code_all', 
+	                    security_nonce: $('#_wpnonce').val(),
+	                  },
+	            cache: false,
+	            cache: false,
+	            success: function (html) {
+	              $this.html(html);
+	              setTimeout(function(){
+	              	$this.html(defaulttext);
+	              },2000);
+	            }
+	        });
+
+		} else {
+		    return false;
+		}
+	});
 });

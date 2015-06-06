@@ -5,9 +5,9 @@ class wplms_custom_certificate_codes_settings{
 	var $settings;
 
 	public function __construct(){
+		$this->settings = get_option(WPLMS_CERTIFICATE_CODES);
 		add_options_page(__('Certificate Codes Settings','wplms_custom_certificate_codes'),__('Certificate Codes','wplms_custom_certificate_codes'),'manage_options','wplms_custom_certificate_codes',array($this,'settings'));
-		add_action('admin_enqueue_scripts',array($this,'enqueue_admin_scripts'));
-		
+		add_action('admin_enqueue_scripts',array($this,'enqueue_admin_scripts'));	
 	}
 
 	function enqueue_admin_scripts($hook){
@@ -50,10 +50,26 @@ class wplms_custom_certificate_codes_settings{
 		$settings=array(
 				array(
 					'label' => __('Set Global Certificate Code pattern','wplms_custom_certificate_codes'),
-					'name' =>'g_c_p',
-					'type' => 'textarea',
+					'name' =>'certificate_pattern',
+					'type' => 'text',
 					'std'=> '',
-					'desc' => __('Set Global Certificate Code pattern','wplms_custom_certificate_codes')
+					'desc' => __('Set Global Certificate Code pattern<br />
+						<strong>{{site}}</strong> : Use this to display Site Name<br />
+						<strong>{{userid}}</strong> : Use this to display User ID<br />
+						<strong>{{courseid}}</strong> : Use this to display Course ID<br />
+						<strong>{{courseslug}}</strong> : Use this to display Course Slug<br />
+						<strong>{{instructorid}}</strong> : Use this to display Course ID<br />
+						<strong>{{n}}</strong> : Use to display unique certificate ID<br />
+						','wplms_custom_certificate_codes')
+				),
+				array(
+					'label' => __('Execute for Previous Certificates','wplms_custom_certificate_codes'),
+					'name' =>'execute_pattern',
+					'type' => 'button',
+					'std'=> __('Apply to all Certificates','wplms_custom_certificate_codes'),
+					'desc' => __('Clicking this button would set the above Certificate Pattern for all previous generated Certificate Code. 
+						Executing this would put load on server depending upon number of previously generated certficates. Max-Limit 999 Certificates.
+						','wplms_custom_certificate_codes')
 				),
 			);
 
@@ -66,11 +82,34 @@ class wplms_custom_certificate_codes_settings{
 		echo '<h3>'.__('Certificate Codes','wplms_custom_certificate_codes').'</h3>';
 		global $wpdb,$bp;
 		$generated_certificate_codes =array();
-		$certificate_codes = $wpdb->get_results($wpdb->prepare("SELECT activity.id as id, activity.user_id as user_id ,activity.item_id as course_id
+		$start = 0;
+		$num=50;
+		if(isset($_GET['p']) && is_numeric($_GET['p'])){
+			$start = $_GET['p']*$num;
+		}
+		$string = __('Instructor assigned/removed Certificate/Badges  ',PLUGIN_DOMAIN);
+		if(isset($_GET['course']) && is_numeric($_GET['course'])){
+			$course_id = intval($_GET['course']);
+			$certificate_codes = $wpdb->get_results($wpdb->prepare("SELECT activity.id as id, activity.user_id as user_id ,activity.item_id as course_id
 																FROM {$bp->activity->table_name} as activity
-																WHERE component = %s AND (type = %s OR type= %s)",'course','student_certificate','bulk_action'));
-
+																WHERE component = %s 
+																AND item_id = %d
+																AND (type = %s OR (type= %s AND action LIKE %s ))
+																ORDER BY activity.id DESC
+																LIMIT %d,%d",'course',$course_id,'student_certificate','bulk_action',$string,$start,$num));
+		}else{
+			$certificate_codes = $wpdb->get_results($wpdb->prepare("SELECT activity.id as id, activity.user_id as user_id ,activity.item_id as course_id
+																FROM {$bp->activity->table_name} as activity
+																WHERE component = %s 
+																AND type = %s 
+																OR (type= %s AND action LIKE %s )
+																ORDER BY activity.id DESC
+																LIMIT %d,%d",'course','student_certificate','bulk_action',$string,$start,$num));	
+		}
+		
 		$activity_table_name = $wpdb->prefix . 'bp_activity_meta';
+
+		$unique_codes = array();
 
 
 		if(is_array($certificate_codes) && count($certificate_codes)){
@@ -79,27 +118,27 @@ class wplms_custom_certificate_codes_settings{
 				$q = $wpdb->prepare("SELECT meta_key,meta_value FROM {$activity_table_name} WHERE activity_id = %d",$code->id);
 				$certificate_code = $wpdb->get_row($q);				
 				if(isset($certificate_code)){
-					$generated_certificate_codes[$code->id] = array($certificate_code->meta_key => $certificate_code->meta_value);
+					if($this->verify_certificate($code->course_id,$code->user_id)){
+						if(!in_array($certificate_code->meta_key,$unique_codes)){
+							$unique_codes[]=$certificate_code->meta_key;
+							$generated_certificate_codes[$code->id] = array($certificate_code->meta_key => $certificate_code->meta_value);
+						}
+					}
 				}else{
+
 					$certificate_template = get_post_meta($code->course_id,'vibe_certificate_template',true);
 					if(!isset($certificate_template) || !is_numeric($certificate_template)){
 						$certificate_template = vibe_get_option('certificate_page');
 					}
-					$c_code = $certificate_template.'-'.$code->course_id.'-'.$code->user_id;
-					$generated_certificate_codes[$code->id]=array($c_code => '');
+					if($this->verify_certificate($code->course_id,$code->user_id)){
+						$c_code = $certificate_template.'-'.$code->course_id.'-'.$code->user_id;
+						if(!in_array($c_code,$unique_codes)){
+							$unique_codes[]=$c_code;
+							$generated_certificate_codes[$code->id]=array($c_code => '');
+						}
+					}
 				}
 			}	
-		}
-
-		if($_GET['tab']=="codes"){
-		echo '<style>
-		input[type="submit"].button-primary{display:none;}
-		</style>';
-		echo '<script>
-		jQuery(document).ready(function($){
-		$(".button-primary").attr("disabled","disabled");
-		});
-		</script>';
 		}
 
 		$settings=array(
@@ -107,9 +146,7 @@ class wplms_custom_certificate_codes_settings{
 					'label' => __('Manage Certificate Codes','wplms_custom_certificate_codes'),
 					'name' => 'wplms_certificate_codes',
 					'type' => 'certificate_codes',
-
 					'std'=> $generated_certificate_codes,
-
 					'desc' => __('some description','wplms_custom_certificate_codes')
 				),
 			);
@@ -117,11 +154,20 @@ class wplms_custom_certificate_codes_settings{
 		$this->generate_form('general',$settings);
 	}
 
+
+	function verify_certificate($course_id,$user_id){
+		$certificates = vibe_sanitize(get_user_meta($user_id,'certificates',false));
+		if(is_array($certificates) && count($certificates)){
+			if(in_array($course_id,$certificates)){
+				return true;
+			}
+		}
+		return false;
+	}
 	function generate_form($tab,$settings=array()){
 		echo '<form method="post">
 				<table class="form-table">';
 		wp_nonce_field('save_settings','_wpnonce');   
-		echo '<ul class="save-settings">';
 
 		foreach($settings as $setting ){
 			echo '<tr valign="top">';
@@ -151,6 +197,11 @@ class wplms_custom_certificate_codes_settings{
 					echo '<td class="forminp"><input type="number" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:'').'" />';
 					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
+				case 'button':
+					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
+					echo '<td class="forminp"><a class="button" id="'.$setting['name'].'">'.$setting['std'].'</a><br />
+					<span>'.$setting['desc'].'</span></td>';
+				break;
 				case 'hidden':
 					echo '<input type="hidden" name="'.$setting['name'].'" value="1"/>';
 				break;
@@ -160,14 +211,26 @@ class wplms_custom_certificate_codes_settings{
 					if(!isset($option) || !is_array($option)){
 						$option = $setting['std'];
 					}
+					echo '<input type="text" id="course_id" name="course" placeholder="'.__('Search Course ID',PLUGIN_DOMAIN).'" value="'.(isset($_GET['course'])?$_GET['course']:'').'" />
+					<a id="search_course" class="button button-primary">'.__('SEARCH',PLUGIN_DOMAIN).'</a>';
 					if (is_array($option) && count($option)){
 						foreach($option as $key => $value){
 
 							foreach((array)$value as $k=>$v){
-								echo '<label>'.$k.'</label><input type="text" id="'.$key.'" data-key="'.$k.'" value="'.$v.'" />
-							<a class="button update_code" data-key="'.$key.'">Update</a><a data-key="'.$key.'" class="button delete_code">Delete</a><br />';
+								echo '</tr><tr valign="top"><th scope="row" class="titledesc">'.$k.'</th>
+								<td class="forminp"><input type="text" id="'.$key.'" data-key="'.$k.'" value="'.$v.'" />
+								<a class="button button-primary update_code" data-key="'.$key.'">Update</a>&nbsp;<a data-key="'.$key.'" class="button delete_code">Delete</a>
+								</td>';
 							}
 						}
+
+						echo '<tr>';
+						if(isset($_GET['p']) && $_GET['p']){
+							echo '<th><a href="?page=wplms_custom_certificate_codes&tab=codes&p='.($_GET['p']-1).'" class="button">'.__('Previous Page',PLUGIN_DOMAIN).'</a></th>';	
+						}
+						echo '<td><a href="?page=wplms_custom_certificate_codes&tab=codes&p='.($_GET['p']+1).'" class="button">'.__('Next Page',PLUGIN_DOMAIN).'</a><td></tr>';
+					}else{
+						echo '<div class="error"><p>'.__('No Certificate Codes found',PLUGIN_DOMAIN).'</p></div>';
 					}
 				break;
 				default:
@@ -181,7 +244,7 @@ class wplms_custom_certificate_codes_settings{
 		}
 		echo '</tbody>
 		</table>';
-		echo '<input type="submit" name="save" value="'.__('Save Settings','wplms_custom_certificate_codes').'" class="button button-primary" /></form>';
+		echo '<input type="submit" name="save" '.(($_GET['tab'] == 'codes')?'style="display:none"':'').' value="'.__('Save Settings','wplms_custom_certificate_codes').'" class="button button-primary" /></form>';
 	}
 
 
@@ -198,13 +261,8 @@ class wplms_custom_certificate_codes_settings{
 		foreach($_POST as $key => $value){
 			$this->settings[$key]=$value;
 		}
-
-		$this->put($this->settings);
+		update_option(WPLMS_CERTIFICATE_CODES,$this->settings);
 	}
 }
 
-add_action('admin_menu','init_wplms_custom_certificate_codes_settings',100);
-function init_wplms_custom_certificate_codes_settings(){
-	new wplms_custom_certificate_codes_settings;	
-}
 
