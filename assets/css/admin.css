@@ -1,3 +1,15 @@
+/*========================================================================*/
+/*   TABLE OF CONTENT
+/*========================================================================*/
+/*
+/*		01. DEFAULT STYLING
+/*		02. CUSTOM CERTIFICATE CODE STYLING
+/*		03. MEDIA QUERIES
+/*
+========================================================================*/
+/*========================================================================*/
+/*   01.DEFAULT STYLING
+/*========================================================================*/
 .bp_fields li.hide{
 	display:none;
 }
@@ -7,4 +19,161 @@
   padding-left: 10px;
   color: #888;
 }
+/*========================================================================*/
+/*   02.CUSTOM CERTIFICATE CODE STYLING
+/*========================================================================*/
+a.button.update_code ,a.button.update_code:hover{
+	background: #449d44;
+  border: 1px solid #449d44;
+  color: #fff;
 
+}
+a.button.delete_code,a.button.delete_code:hover{
+	background: #d9534f;
+	 border: 1px solid #d9534f;
+	 color: #fff;
+}
+.custom_certificate_code li{
+  padding: 6px 0;
+  border-bottom: 1px solid #DDD;
+}
+.custom_certificate_code li label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-right: 60px;
+  width:180px;
+  float: left;
+  text-align: center;
+}
+.custom_certificate_code li input{
+  border: 1px solid #ddd;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+  background-color: #fff;
+  color: #32373c;
+  outline: 0;
+  width:220px;
+  -webkit-transition: .05s border-color ease-in-out;
+  transition: .05s border-color ease-in-out;
+}
+/*========================================================================*/
+/*   03.MEDIA QUERIES
+/*========================================================================*/
+@media (max-width: 770px) and (min-width: 660px){
+	a.button.update_code {
+		 
+		  width: 80px;
+		  text-align: center;
+		
+}
+
+	a.button.delete_code  {
+		
+		  width: 80px;
+		  text-align: center;
+		  
+
+	}
+	.custom_certificate_code li input{
+  border: 1px solid #ddd;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+  background-color: #fff;
+  color: #32373c;
+  outline: 0;
+  width:220px;
+   
+  -webkit-transition: .05s border-color ease-in-out;
+  transition: .05s border-color ease-in-out;
+}
+.custom_certificate_code li label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-right: 60px;
+  width:110px;
+  float: left;
+  text-align: center;
+}
+
+}
+
+
+@media (max-width: 660px)and (min-width: 440px){
+	a.button.update_code {
+		display: inline-block;
+		  width: 80px;
+		  text-align: center;
+		  margin-left: 220px;
+		  margin-top: 15px;
+		 }
+
+	a.button.delete_code  {
+		  width: 80px;
+		  text-align: center;
+		  margin-top: 15px;
+		  
+	}
+	.custom_certificate_code li input{
+		  border: 1px solid #ddd;
+		  -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+		  box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+		  background-color: #fff;
+		  color: #32373c;
+		  outline: 0;
+		  width:200px;
+		   margin-left: 20px;
+		  -webkit-transition: .05s border-color ease-in-out;
+		  transition: .05s border-color ease-in-out;
+}
+.custom_certificate_code li label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-right: 60px;
+  width:100px;
+  float: left;
+   margin-left: 20px;
+  text-align: center;
+}
+
+}
+
+
+@media (max-width: 440px){
+	a.button.update_code {
+		  display: block;
+		  width: 80px;
+		  text-align: center;
+		  margin-left: 120px;
+}
+
+	a.button.delete_code  {
+		display: block;
+		  width: 80px;
+		  text-align: center;
+		  margin-left: 120px;
+
+	}
+	.custom_certificate_code li input{
+		display: block;
+		  border: 1px solid #ddd;
+		  -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+		  box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
+		  background-color: #fff;
+		  color: #32373c;
+		  outline: 0;
+		  width:200px;
+		   margin-left: 50px;
+		  -webkit-transition: .05s border-color ease-in-out;
+		  transition: .05s border-color ease-in-out;
+}
+.custom_certificate_code li label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-right: 60px;
+  width:180px;
+  float: left;
+   margin-left: 70px;
+  text-align: center;
+}
+
+}
