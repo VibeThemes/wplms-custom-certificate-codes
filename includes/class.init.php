@@ -57,24 +57,8 @@ class wplms_custom_certificate_codes{
 						 ORDER BY meta.id DESC",$code);
 	 $certificate_code = $wpdb->get_var($q);
 	
-			function my_custom_certificate_code($code,$course_id,$user_id){
-			 			$uid=$_GET['u'];
-			            $cid=$_GET['c'];
-			            $blog_title = get_bloginfo('name');
 	if(isset($certificate_code)) 
-			            	$ctemplate=get_post_meta($cid,'vibe_certificate_template',true);
-			            	if(isset($ctemplate) && $ctemplate){
-			            		$code =  $blog_title.'|'.$uid.'|'.$cid.'|'.$ctemplate;
-			            	}else{
-			            		$code =  $blog_title .'|'.$uid.'|'.$cid.'|'.get_the_ID();
-			            	}
-			            	return $code;
-			            }
-			            else{
 		return $certificate_code;
-			            }
-			}
- 
 
 	return $code;
 	}
@@ -118,12 +102,5 @@ class wplms_custom_certificate_codes{
 			return $code;
 	}
 
-}
-
-
-
-add_action('init','define_wplms_custom_certificate_codes');
-function define_wplms_custom_certificate_codes(){
-	new wplms_custom_certificate_codes;
 }
 ?>

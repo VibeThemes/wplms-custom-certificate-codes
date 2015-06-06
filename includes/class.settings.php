@@ -111,6 +111,7 @@ class wplms_custom_certificate_codes_settings{
 
 		$unique_codes = array();
 
+		print_r($certificate_codes);
 
 		if(is_array($certificate_codes) && count($certificate_codes)){
 			foreach($certificate_codes as $code){
@@ -141,16 +142,6 @@ class wplms_custom_certificate_codes_settings{
 			}	
 		}
 
-		if($_GET['tab']=="codes"){
-		echo '<style>
-		input[type="submit"].button-primary{display:none;}
-		</style>';
-		echo '<script>
-		jQuery(document).ready(function($){
-		$(".button-primary").attr("disabled","disabled");
-		});
-		</script>';
-		}
 
 		$settings=array(
 				array(
