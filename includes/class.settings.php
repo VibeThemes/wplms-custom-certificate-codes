@@ -73,7 +73,6 @@ class wplms_custom_certificate_codes_settings{
 
 		if(is_array($certificate_codes) && count($certificate_codes)){
 			foreach($certificate_codes as $code){
-				
 				$q = $wpdb->prepare("SELECT meta_key,meta_value FROM {$activity_table_name} WHERE activity_id = %d",$code->id);
 				$certificate_code = $wpdb->get_row($q);				
 				if(isset($certificate_code)){
