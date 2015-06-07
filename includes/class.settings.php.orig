@@ -49,16 +49,18 @@ class wplms_custom_certificate_codes_settings{
 	
 		$settings=array(
 				array(
-					'label' => __('Field','wplms_custom_certificate_codes'),
-					'name' =>'security',
-					'type' => 'text',
+					'label' => __('Set Global Certificate Code pattern','wplms_custom_certificate_codes'),
+					'name' =>'g_c_p',
+					'type' => 'textarea',
 					'std'=> '',
-					'desc' => __('some description','wplms_custom_certificate_codes')
+					'desc' => __('Set Global Certificate Code pattern','wplms_custom_certificate_codes')
 				),
 			);
 
 		$this->generate_form('general',$settings);
 	}
+
+
 
 	function codes(){
 		echo '<h3>'.__('Certificate Codes','wplms_custom_certificate_codes').'</h3>';
@@ -66,7 +68,11 @@ class wplms_custom_certificate_codes_settings{
 		$generated_certificate_codes = array();
 		$certificate_codes = $wpdb->get_results($wpdb->prepare("SELECT activity.id as id, activity.user_id as user_id ,activity.item_id as course_id
 																FROM {$bp->activity->table_name} as activity
+<<<<<<< HEAD
 																WHERE component = %s AND ( type = %s OR type = %s)",'course','student_certificate','bulk_action'));
+=======
+																WHERE component = %s AND (type = %s OR type= %s)",'course','student_certificate','bulk_action'));
+>>>>>>> disabled the save settings button on codes tab and enabled on general tab
 
 		$activity_table_name = $wpdb->prefix . 'bp_activity_meta';
 
@@ -89,6 +95,19 @@ class wplms_custom_certificate_codes_settings{
 			}	
 		}
 
+<<<<<<< HEAD
+=======
+		if($_GET['tab']=="codes"){
+		echo '<style>
+		input[type="submit"].button-primary{display:none;}
+		</style>';
+		echo '<script>
+		jQuery(document).ready(function($){
+		$(".button-primary").attr("disabled","disabled");
+		});
+		</script>';
+		}
+>>>>>>> disabled the save settings button on codes tab and enabled on general tab
 
 		$settings=array(
 				array(
@@ -98,10 +117,10 @@ class wplms_custom_certificate_codes_settings{
 <<<<<<< HEAD
 					'std'=> $generated_certificate_codes,
 =======
-					'std'=> array(
-					'2060-1139-1' => 'ABC1'
-						),
->>>>>>> custom certificate code by using support docs
+
+					'std'=> $generated_certificate_codes,
+
+>>>>>>> disabled the save settings button on codes tab and enabled on general tab
 					'desc' => __('some description','wplms_custom_certificate_codes')
 				),
 			);
@@ -149,10 +168,15 @@ class wplms_custom_certificate_codes_settings{
 				break;
 <<<<<<< HEAD
 				case 'certificate_codes': 
+=======
+				case 'certificate_codes':
+
+>>>>>>> disabled the save settings button on codes tab and enabled on general tab
 					$option =  get_option($setting['name']);
 					if(!isset($option) || !is_array($option)){
 						$option = $setting['std'];
 					}
+<<<<<<< HEAD
 					if(is_array($option) && count($option)){
 						foreach($option as $key => $value){ 
 							if(is_array($value)){
@@ -161,15 +185,17 @@ class wplms_custom_certificate_codes_settings{
 									<li><label>'.$k.'</label>&nbsp;<input type="text" id="'.$key.'" data-key="'.$k.'" value="'.$v.'" placeholder="Enter Custom Certificate Code" />
 								&nbsp;&nbsp;<a class="button update_code" data-key="'.$key.'">Update</a>&nbsp;&nbsp;&nbsp;<a data-key="'.$key.'" class="button delete_code ">Delete</a></li>';
 								}
+=======
+					if (is_array($option) && count($option)){
+						foreach($option as $key => $value){
+
+							foreach((array)$value as $k=>$v){
+								echo '<label>'.$k.'</label><input type="text" id="'.$key.'" data-key="'.$k.'" value="'.$v.'" />
+							<a class="button update_code" data-key="'.$key.'">Update</a><a data-key="'.$key.'" class="button delete_code">Delete</a><br />';
+>>>>>>> disabled the save settings button on codes tab and enabled on general tab
 							}
 						}
 					}
-=======
-				case 'certificate_codes':
-					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
-					echo '<td class="forminp"><input update_codet type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
-					echo '<span>'.$setting['desc'].'</span></td>';
->>>>>>> custom certificate code by using support docs
 				break;
 				default:
 					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';

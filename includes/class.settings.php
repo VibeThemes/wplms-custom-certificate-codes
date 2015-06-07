@@ -49,16 +49,18 @@ class wplms_custom_certificate_codes_settings{
 	
 		$settings=array(
 				array(
-					'label' => __('Field','wplms_custom_certificate_codes'),
-					'name' =>'security',
-					'type' => 'text',
+					'label' => __('Set Global Certificate Code pattern','wplms_custom_certificate_codes'),
+					'name' =>'g_c_p',
+					'type' => 'textarea',
 					'std'=> '',
-					'desc' => __('some description','wplms_custom_certificate_codes')
+					'desc' => __('Set Global Certificate Code pattern','wplms_custom_certificate_codes')
 				),
 			);
 
 		$this->generate_form('general',$settings);
 	}
+
+
 
 	function codes(){
 		echo '<h3>'.__('Certificate Codes','wplms_custom_certificate_codes').'</h3>';
@@ -89,6 +91,16 @@ class wplms_custom_certificate_codes_settings{
 			}	
 		}
 
+		if($_GET['tab']=="codes"){
+		echo '<style>
+		input[type="submit"].button-primary{display:none;}
+		</style>';
+		echo '<script>
+		jQuery(document).ready(function($){
+		$(".button-primary").attr("disabled","disabled");
+		});
+		</script>';
+		}
 
 		$settings=array(
 				array(
@@ -148,6 +160,7 @@ class wplms_custom_certificate_codes_settings{
 					}
 					if(is_array($option) && count($option)){
 						foreach($option as $key => $value){ 
+
 							if(is_array($value)){
 								foreach($value as $k=>$v){	
 									echo '<ul class="custom_certificate_code">
