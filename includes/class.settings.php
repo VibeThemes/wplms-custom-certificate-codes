@@ -49,16 +49,18 @@ class wplms_custom_certificate_codes_settings{
 	
 		$settings=array(
 				array(
-					'label' => __('Field','wplms_custom_certificate_codes'),
-					'name' =>'security',
-					'type' => 'text',
+					'label' => __('Set Global Certificate Code pattern','wplms_custom_certificate_codes'),
+					'name' =>'g_c_p',
+					'type' => 'textarea',
 					'std'=> '',
-					'desc' => __('some description','wplms_custom_certificate_codes')
+					'desc' => __('Set Global Certificate Code pattern','wplms_custom_certificate_codes')
 				),
 			);
 
 		$this->generate_form('general',$settings);
 	}
+
+
 
 	function codes(){
 		echo '<h3>'.__('Certificate Codes','wplms_custom_certificate_codes').'</h3>';
@@ -66,7 +68,7 @@ class wplms_custom_certificate_codes_settings{
 		$generated_certificate_codes =array();
 		$certificate_codes = $wpdb->get_results($wpdb->prepare("SELECT activity.id as id, activity.user_id as user_id ,activity.item_id as course_id
 																FROM {$bp->activity->table_name} as activity
-																WHERE component = %s AND type = %s",'course','student_certificate'));
+																WHERE component = %s AND (type = %s OR type= %s)",'course','student_certificate','bulk_action'));
 
 		$activity_table_name = $wpdb->prefix . 'bp_activity_meta';
 
@@ -88,18 +90,26 @@ class wplms_custom_certificate_codes_settings{
 				}
 			}	
 		}
+
+		if($_GET['tab']=="codes"){
+		echo '<style>
+		input[type="submit"].button-primary{display:none;}
+		</style>';
+		echo '<script>
+		jQuery(document).ready(function($){
+		$(".button-primary").attr("disabled","disabled");
+		});
+		</script>';
+		}
+
 		$settings=array(
 				array(
 					'label' => __('Manage Certificate Codes','wplms_custom_certificate_codes'),
 					'name' => 'wplms_certificate_codes',
 					'type' => 'certificate_codes',
-<<<<<<< HEAD
-					'std'=> array(
-					'2060-1139-1' => 'ABC1'
-						),
-=======
+
 					'std'=> $generated_certificate_codes,
->>>>>>> 61ef327fc57697889a706fb7d33dd4d0eeb36bdf
+
 					'desc' => __('some description','wplms_custom_certificate_codes')
 				),
 			);
@@ -145,22 +155,20 @@ class wplms_custom_certificate_codes_settings{
 					echo '<input type="hidden" name="'.$setting['name'].'" value="1"/>';
 				break;
 				case 'certificate_codes':
-<<<<<<< HEAD
-					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
-					echo '<td class="forminp"><input update_codet type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
-					echo '<span>'.$setting['desc'].'</span></td>';
-=======
+
 					$option =  get_option($setting['name']);
 					if(!isset($option) || !is_array($option)){
 						$option = $setting['std'];
 					}
-					foreach($option as $key => $value){
-						foreach($value as $k=>$v){
-							echo '<label>'.$k.'</label><input type="text" id="'.$key.'" data-key="'.$k.'" value="'.$v.'" />
-						<a class="button update_code" data-key="'.$key.'">Update</a><a data-key="'.$key.'" class="button delete_code">Delete</a><br />';
+					if (is_array($option) && count($option)){
+						foreach($option as $key => $value){
+
+							foreach((array)$value as $k=>$v){
+								echo '<label>'.$k.'</label><input type="text" id="'.$key.'" data-key="'.$k.'" value="'.$v.'" />
+							<a class="button update_code" data-key="'.$key.'">Update</a><a data-key="'.$key.'" class="button delete_code">Delete</a><br />';
+							}
 						}
 					}
->>>>>>> 61ef327fc57697889a706fb7d33dd4d0eeb36bdf
 				break;
 				default:
 					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
