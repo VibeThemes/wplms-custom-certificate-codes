@@ -1,6 +1,5 @@
 <?php
 
-
 class wplms_custom_certificate_codes{
 
 	var $version;
@@ -53,13 +52,10 @@ class wplms_custom_certificate_codes{
 	 
 	 global $wpdb,$bp;
 	 $activity_meta_table = $wpdb->prefix.'bp_activity_meta';
-	 $certificate_code = $wpdb->get_var($wpdb->prepare("SELECT meta.meta_value 
-														FROM {$bp->activity->table_name} as activity LEFT JOIN  {$activity_meta_table} as meta
-														ON activity.id = meta.activity_id
-														WHERE activity.component = %s 
-														AND activity.type = %s
-														AND activity.item_id = %d
-														AND activity.user_id = %d",'course','student_certificate',$course_id,$user_id));
+	 $q = $wpdb->prepare("SELECT meta.meta_value FROM {$activity_meta_table} as meta
+						 WHERE meta.meta_key = %s
+						 ORDER BY meta.id DESC",$code);
+	 $certificate_code = $wpdb->get_var($q);
 	
 			function my_custom_certificate_code($code,$course_id,$user_id){
 			 			$uid=$_GET['u'];
