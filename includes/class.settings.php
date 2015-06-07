@@ -66,7 +66,7 @@ class wplms_custom_certificate_codes_settings{
 					'name' => 'wplms_certificate_codes',
 					'type' => 'certificate_codes',
 					'std'=> array(
-						'2060-1139-1' => 'ABC1'
+					'2060-1139-1' => 'ABC1'
 						),
 					'desc' => __('some description','wplms_custom_certificate_codes')
 				),
@@ -113,18 +113,13 @@ class wplms_custom_certificate_codes_settings{
 					echo '<input type="hidden" name="'.$setting['name'].'" value="1"/>';
 				break;
 				case 'certificate_codes':
-					$option =  get_option($setting['name']);
-					if(!isset($option) || !is_array($option)){
-						$option = $setting['std'];
-					}
-					foreach($option as $key => $value){
-						echo '<label>'.$key.'</label><input type="text" id="'.$key.'" value="'.$value.'" />
-						<a class="button update_code" data-key="'.$key.'">Update</a><a data-key="'.$key.'" class="button delete_code">Delete</a>';
-					}
+					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
+					echo '<td class="forminp"><input update_codet type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
+					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 				default:
 					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
-					echo '<td class="forminp"><inpu update_codet type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
+					echo '<td class="forminp"><input update_codet type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
 					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 			}
