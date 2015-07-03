@@ -59,6 +59,8 @@ class wplms_custom_certificate_codes_settings{
 						<strong>{{courseid}}</strong> : Use this to display Course ID<br />
 						<strong>{{courseslug}}</strong> : Use this to display Course Slug<br />
 						<strong>{{instructorid}}</strong> : Use this to display Course ID<br />
+						<strong>{{month}}</strong> : Use to display month in numeric MM<br />
+						<strong>{{year}}</strong> : Use to display year in numeric YYYY<br />
 						<strong>{{n}}</strong> : Use to display unique certificate ID<br />
 						','wplms_custom_certificate_codes')
 				),
@@ -82,62 +84,93 @@ class wplms_custom_certificate_codes_settings{
 		echo '<h3>'.__('Certificate Codes','wplms_custom_certificate_codes').'</h3>';
 		global $wpdb,$bp;
 		$generated_certificate_codes =array();
+		$certificate_codes_array = array();	
 		$start = 0;
-		$num=50;
+		$num=100;
 		if(isset($_GET['p']) && is_numeric($_GET['p'])){
 			$start = $_GET['p']*$num;
 		}
-		$string = __('Instructor assigned/removed Certificate/Badges  ',PLUGIN_DOMAIN);
+		
 		if(isset($_GET['course']) && is_numeric($_GET['course'])){
 			$course_id = intval($_GET['course']);
 			$certificate_codes = $wpdb->get_results($wpdb->prepare("SELECT activity.id as id, activity.user_id as user_id ,activity.item_id as course_id
 																FROM {$bp->activity->table_name} as activity
 																WHERE component = %s 
 																AND item_id = %d
-																AND (type = %s OR (type= %s AND action LIKE %s ))
+																AND type = %s
 																ORDER BY activity.id DESC
-																LIMIT %d,%d",'course',$course_id,'student_certificate','bulk_action',$string,$start,$num));
+																LIMIT %d,%d",'course',$course_id,'student_certificate',$start,$num));
+			$codes = $wpdb->get_Results($wpdb->prepare("SELECT activity.id as id, meta.meta_value as user_id ,activity.item_id as course_id
+														FROM {$bp->activity->table_name} as activity  LEFT JOIN {$bp->activity->table_name_meta} as meta ON activity.id = meta.activity_id
+														WHERE component = %s 
+														AND item_id = %d
+														AND type = %s 
+														AND meta.meta_key = %s
+														ORDER BY activity.id DESC
+														LIMIT %d,%d",'course',$course_id,'add_certificate',$start,$num));
 		}else{
 			$certificate_codes = $wpdb->get_results($wpdb->prepare("SELECT activity.id as id, activity.user_id as user_id ,activity.item_id as course_id
-																FROM {$bp->activity->table_name} as activity
+																FROM {$bp->activity->table_name} as activity  
 																WHERE component = %s 
 																AND type = %s 
-																OR (type= %s AND action LIKE %s )
 																ORDER BY activity.id DESC
-																LIMIT %d,%d",'course','student_certificate','bulk_action',$string,$start,$num));	
+																LIMIT %d,%d",'course','student_certificate',$start,$num));	
+			$codes = $wpdb->get_Results($wpdb->prepare("SELECT activity.id as id, meta.meta_value as user_id ,activity.item_id as course_id
+														FROM {$bp->activity->table_name} as activity  LEFT JOIN {$bp->activity->table_name_meta} as meta ON activity.id = meta.activity_id
+														WHERE activity.component = %s 
+														AND activity.type = %s 
+														AND meta.meta_key = %s
+														ORDER BY activity.id DESC
+														LIMIT %d,%d",'course','bulk_action','add_certificate',$start,$num));	
+			
+			
 		}
 		
-		$activity_table_name = $wpdb->prefix . 'bp_activity_meta';
+		
+		
+		if(is_array($certificate_codes) && count($certificate_codes)){
+			foreach($certificate_codes as $code){
+				$certificate_codes_array[$code->id]=array('id'=>$code->id,'user_id'=>$code->user_id,'course_id'=>$code->course_id);
+			}
+		}
+		if(is_array($codes) && count($codes)){
+			foreach($codes as $code){
+				$certificate_codes_array[$code->id]=array('id'=>$code->id,'user_id'=>$code->user_id,'course_id'=>$code->course_id);
+			}
+		}
+
 
 		$unique_codes = array();
 
-
-		if(is_array($certificate_codes) && count($certificate_codes)){
-			foreach($certificate_codes as $code){
+		if(is_array($certificate_codes_array) && count($certificate_codes_array)){
+			foreach($certificate_codes_array as $code){
 				
-				$q = $wpdb->prepare("SELECT meta_key,meta_value FROM {$activity_table_name} WHERE activity_id = %d",$code->id);
+
+				$q = $wpdb->prepare("SELECT meta_key,meta_value FROM {$bp->activity->table_name_meta} WHERE activity_id = %d AND meta_key LIKE %s",$code['id'],'%-%');
 				$certificate_code = $wpdb->get_row($q);				
+
 				if(isset($certificate_code)){
-					if($this->verify_certificate($code->course_id,$code->user_id)){
+					if($this->verify_certificate($code['course_id'],$code['user_id'])){
 						if(!in_array($certificate_code->meta_key,$unique_codes)){
 							$unique_codes[]=$certificate_code->meta_key;
-							$generated_certificate_codes[$code->id] = array($certificate_code->meta_key => $certificate_code->meta_value);
+							$generated_certificate_codes[$code['id']] = array($certificate_code->meta_key => $certificate_code->meta_value);
 						}
 					}
 				}else{
 
-					$certificate_template = get_post_meta($code->course_id,'vibe_certificate_template',true);
+					$certificate_template = get_post_meta($code['course_id'],'vibe_certificate_template',true);
 					if(!isset($certificate_template) || !is_numeric($certificate_template)){
 						$certificate_template = vibe_get_option('certificate_page');
 					}
-					if($this->verify_certificate($code->course_id,$code->user_id)){
-						$c_code = $certificate_template.'-'.$code->course_id.'-'.$code->user_id;
+					if($this->verify_certificate($code['course_id'],$code['user_id'])){
+						$c_code = $certificate_template.'-'.$code['course_id'].'-'.$code['user_id'];
 						if(!in_array($c_code,$unique_codes)){
 							$unique_codes[]=$c_code;
-							$generated_certificate_codes[$code->id]=array($c_code => '');
+							$generated_certificate_codes[$code['id']]=array($c_code => '');
 						}
 					}
 				}
+				$code='';
 			}	
 		}
 

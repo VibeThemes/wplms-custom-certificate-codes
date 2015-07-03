@@ -80,7 +80,7 @@ $('.delete_code').on('click',function(){
 	$('#execute_pattern').on('click',function(){
 		var $this= $(this);
 		var defaulttext = $this.html();
-		var x = confirm("Are you sure you want to continue ?");
+		var x = confirm("Make sure you've saved the settings first. Are you sure you want to continue ?");
 		if (x == true) {
 		    $this.html('Processing...');
 	        $.ajax({
