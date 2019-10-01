@@ -8,7 +8,7 @@ class process_certificate_pattern{
 	function __construct(){
 		$this->certificate_code = '';
 		$this->fetch_format();
-		add_action('bp_activity_add',array($this,'grab_certificate'),10,1);
+		add_action('bp_activity_add',array($this,'grab_certificate'),10,2);
 		add_action('wp_ajax_process_code_all',array($this,'process_code_all'));
 	}
 
@@ -17,8 +17,10 @@ class process_certificate_pattern{
 		$this->format = $values['certificate_pattern'];
 	}
 
-	function grab_certificate($args){
-		
+	function grab_certificate($args,$activity_id){
+		if(empty($args['id'])){
+            $args['id']=$activity_id;
+        }
 		switch($args['type']){
 			case 'student_certificate':
 				$this->process_format($args);
