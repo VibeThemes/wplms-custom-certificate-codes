@@ -3,7 +3,7 @@
 Plugin Name: WPLMS Custom Certificate Codes
 Plugin URI: http://www.vibethemes.com
 Description: Custom Certificate Codes Plugin for WPLMS
-Version: 1.0
+Version: 1.1
 Author: VibeThemes
 Author URI: http://www.VibeThemes.com/
 */
