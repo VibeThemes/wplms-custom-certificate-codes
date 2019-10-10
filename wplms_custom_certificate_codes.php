@@ -11,7 +11,9 @@ Author URI: http://www.VibeThemes.com/
 
 if ( ! defined( 'PLUGIN_DOMAIN' ) )
     define ( 'PLUGIN_DOMAIN', 'wplms_custom_certificate_codes' );
-
+if(!defined('WPLMS_CERTIFICATE_CODES')){
+    define('WPLMS_CERTIFICATE_CODES','wplms_certificate_code_settings');    
+}
 /*====== BEGIN VSLIDER======*/
 include_once('includes/class.config.php');
 include_once('includes/class.init.php');
@@ -43,3 +45,16 @@ add_action('init','define_wplms_custom_certificate_codes');
 function define_wplms_custom_certificate_codes(){
     new wplms_custom_certificate_codes;
 }
+
+
+function Wplms_Custom_Certificates_Codes_Update() {
+    $license_key = trim( get_option( 'wplms_custom_certificate_codes_license_key' ) );
+    $edd_updater = new Wplms_Pdf_Certificates_Plugin_Updater( 'https://wplms.io', __FILE__, array(
+            'version'   => '1.0',               
+            'license'   => $license_key,        
+            'item_name' => 'WPLMS Custom Certificate Codes',    
+            'author'    => 'VibeThemes' 
+        )
+    );
+}
+add_action( 'admin_init', 'Wplms_Custom_Certificates_Codes_Update', 0 );

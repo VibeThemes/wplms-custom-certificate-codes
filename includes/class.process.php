@@ -6,10 +6,27 @@ class process_certificate_pattern{
 	var $format;
 	var $certificate_code;
 	function __construct(){
+		$this->bulk_action_user_id = '';
 		$this->certificate_code = '';
 		$this->fetch_format();
 		add_action('bp_activity_add',array($this,'grab_certificate'),10,2);
+
+		add_action( 'updated_activity_meta', array($this,'grab_activity_meta'),10,4 );
+		add_action( 'added_activity_meta', array($this,'grab_activity_meta'),10,4 );
+
 		add_action('wp_ajax_process_code_all',array($this,'process_code_all'));
+	}
+
+	function grab_activity_meta($meta_id, $object_id, $meta_key, $_meta_value){
+		if(!function_exists('bp_activity_get'))
+			return;
+		if($meta_key == 'add_certificate'){
+			$activity = bp_activity_get(array('id'=>$object_id));
+			$activity = (array)$activity['activities'][0];
+			$activity['user_id'] = $_meta_value;
+			$this->process_format($activity);
+		}
+		
 	}
 
 	function fetch_format(){
@@ -22,22 +39,21 @@ class process_certificate_pattern{
             $args['id']=$activity_id;
         }
 		switch($args['type']){
-			case 'student_certificate':
-				$this->process_format($args);
-			break;
-			case 'bulk_action':
-				$string = __('Instructor assigned/removed Certificate/Badges','vibe');
-
-				if($args['action'] === $string){ 
-					$this->process_format($args);
-				}
-			break;
-		}
+            case 'student_certificate':
+                 $this->process_format($args);
+            break;
+            /*case 'bulk_action':
+                $string = __('Instructor assigned/removed Certificate/Badges','vibe');
+                if($args['action'] === $string){
+                	$this->bulk_action_user_id = $user_id;
+                    
+                }
+            break;*/
+        }
 	}
 
 	function process_format($args){
-
-		$course_id = $args['item_id'];
+		$course_id = intval($args['item_id']);
 		$user_id = $args['user_id'];
 		$activity_id = $args['id'];
 
@@ -102,12 +118,14 @@ class process_certificate_pattern{
 			
 			$this->certificate_code = $format;
 		}
-
-		$certificate_template = get_post_meta($course_id,'vibe_certificate_template',true);
-		if(!isset($certificate_template) || !is_numeric($certificate_template)){
-			$certificate_template = vibe_get_option('certificate_page');
+		remove_filter( 'query', 'bp_filter_metaid_column_name' );
+		$ctemplate = get_post_meta($course_id,'vibe_certificate_template',true);
+		add_filter( 'query', 'bp_filter_metaid_column_name' );
+		$ctemplate = intval($ctemplate); 
+		if(empty($ctemplate)){
+			$ctemplate = get_the_ID();
 		}
-		$code = $certificate_template.'-'.$course_id.'-'.$user_id;
+		$code = $ctemplate.'-'.$course_id.'-'.$user_id;
 		bp_activity_update_meta($activity_id,$code,$this->certificate_code);
 	}
 
