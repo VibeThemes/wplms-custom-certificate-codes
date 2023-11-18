@@ -16,6 +16,7 @@ if(!defined('WPLMS_CERTIFICATE_CODES')){
 }
 /*====== BEGIN VSLIDER======*/
 include_once('includes/class.config.php');
+include_once('includes/class.updater.php');
 include_once('includes/class.init.php');
 include_once('includes/class.process.php');
 include_once('includes/class.settings.php');
@@ -49,7 +50,7 @@ function define_wplms_custom_certificate_codes(){
 
 function Wplms_Custom_Certificates_Codes_Update() {
     $license_key = trim( get_option( 'wplms_custom_certificate_codes_license_key' ) );
-    $edd_updater = new Wplms_Pdf_Certificates_Plugin_Updater( 'https://wplms.io', __FILE__, array(
+    $edd_updater = new Wplms_Custom_Certificates_Codes_Plugin_Updater( 'https://wplms.io', __FILE__, array(
             'version'   => '1.0',               
             'license'   => $license_key,        
             'item_name' => 'WPLMS Custom Certificate Codes',    

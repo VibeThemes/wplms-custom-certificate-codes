@@ -31,7 +31,11 @@ class process_certificate_pattern{
 
 	function fetch_format(){
 		$values = get_option(WPLMS_CERTIFICATE_CODES);
-		$this->format = $values['certificate_pattern'];
+		$this->format =  '';
+		if(!empty($values)){
+			$this->format = $values['certificate_pattern'];
+		}
+		
 	}
 
 	function grab_certificate($args,$activity_id){
