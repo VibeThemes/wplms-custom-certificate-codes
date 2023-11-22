@@ -259,9 +259,10 @@ class wplms_custom_certificate_codes_settings{
 
 						echo '<tr>';
 						if(isset($_GET['p']) && $_GET['p']){
-							echo '<th><a href="?page=wplms_custom_certificate_codes&tab=codes&p='.($_GET['p']-1).'" class="button">'.__('Previous Page',PLUGIN_DOMAIN).'</a></th>';	
+							echo '<th><a href="?page=wplms_custom_certificate_codes&tab=codes&p='.($_GET['p']-1).'" class="button">'.__('Previous Page',PLUGIN_DOMAIN).'</a></th>';
+							echo '<td><a href="?page=wplms_custom_certificate_codes&tab=codes&p='.($_GET['p']+1).'" class="button">'.__('Next Page',PLUGIN_DOMAIN).'</a><td></tr>';	
 						}
-						echo '<td><a href="?page=wplms_custom_certificate_codes&tab=codes&p='.($_GET['p']+1).'" class="button">'.__('Next Page',PLUGIN_DOMAIN).'</a><td></tr>';
+						
 					}else{
 						echo '<div class="error"><p>'.__('No Certificate Codes found',PLUGIN_DOMAIN).'</p></div>';
 					}
@@ -277,7 +278,7 @@ class wplms_custom_certificate_codes_settings{
 		}
 		echo '</tbody>
 		</table>';
-		echo '<input type="submit" name="save" '.(($_GET['tab'] == 'codes')?'style="display:none"':'').' value="'.__('Save Settings','wplms_custom_certificate_codes').'" class="button button-primary" /></form>';
+		echo '<input type="submit" name="save" '.((!empty($_GET['tab']) && $_GET['tab'] == 'codes')?'style="display:none"':'').' value="'.__('Save Settings','wplms_custom_certificate_codes').'" class="button button-primary" /></form>';
 	}
 
 
