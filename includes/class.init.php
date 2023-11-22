@@ -50,17 +50,17 @@ class wplms_custom_certificate_codes{
 
 	function my_custom_certificate_code($code,$course_id,$user_id){
 	 
-	 global $wpdb,$bp;
-	 $activity_meta_table = $wpdb->prefix.'bp_activity_meta';
-	 $q = $wpdb->prepare("SELECT meta.meta_value FROM {$activity_meta_table} as meta
-						 WHERE meta.meta_key = %s
-						 ORDER BY meta.id DESC",$code);
-	 $certificate_code = $wpdb->get_var($q);
-	
-	if(isset($certificate_code)) 
-		return $certificate_code;
+		 global $wpdb,$bp;
+		 $activity_meta_table = $wpdb->prefix.'bp_activity_meta';
+		 $q = $wpdb->prepare("SELECT meta.meta_value FROM {$activity_meta_table} as meta
+							 WHERE meta.meta_key = %s
+							 ORDER BY meta.id DESC",$code);
+		 $certificate_code = $wpdb->get_var($q);
+		
+		if(isset($certificate_code)) 
+			return $certificate_code;
 
-	return $code;
+		return $code;
 	}
 
  

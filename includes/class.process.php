@@ -11,8 +11,8 @@ class process_certificate_pattern{
 		$this->fetch_format();
 		add_action('bp_activity_add',array($this,'grab_certificate'),10,2);
 
-		add_action( 'updated_activity_meta', array($this,'grab_activity_meta'),10,4 );
-		add_action( 'added_activity_meta', array($this,'grab_activity_meta'),10,4 );
+		//add_action( 'updated_activity_meta', array($this,'grab_activity_meta'),10,4 );
+		//add_action( 'added_activity_meta', array($this,'grab_activity_meta'),10,4 );
 
 		add_action('wp_ajax_process_code_all',array($this,'process_code_all'));
 	}
